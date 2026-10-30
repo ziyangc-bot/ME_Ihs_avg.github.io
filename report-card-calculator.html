@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Final Average Calculator</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+:root{--bg:#f4f7fd;--surface:#fff;--ink:#17224a;--muted:#55608a;--line:#d3dbf0;--accent:#2a45d6;--accent-ink:#fff;--hi:#ffe45e;--bad:#b4281f;--band:#eaeffb}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1430;--surface:#172044;--ink:#eef1ff;--muted:#a5aed4;--line:#2b3668;--accent:#8fa4ff;--accent-ink:#0e1430;--hi:#6b5d12;--bad:#ff9189;--band:#1f2958}}
+:root[data-theme="dark"]{--bg:#0e1430;--surface:#172044;--ink:#eef1ff;--muted:#a5aed4;--line:#2b3668;--accent:#8fa4ff;--accent-ink:#0e1430;--hi:#6b5d12;--bad:#ff9189;--band:#1f2958}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background-color:var(--bg);color:var(--ink);font:400 1.0625rem/1.5 "Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);background-size:32px 32px;background-position:-1px -1px;min-height:100vh}
+.wrap{max-width:44rem;margin:0 auto;padding:2.5rem 1rem 3rem}
+h1,h2,.big{font-family:"Bricolage Grotesque","Trebuchet MS",system-ui,sans-serif}
+h1{font-size:clamp(2rem,6vw,3.25rem);line-height:1.05;margin:0 0 .75rem;font-weight:800;letter-spacing:-.02em}
+.lede{margin:0 0 2rem;color:var(--muted);max-width:52ch}
+[hidden]{display:none!important}
+.classes{display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr))}
+.class{display:block;width:100%;text-align:left;background:var(--surface);color:var(--ink);border:2px solid var(--ink);border-radius:6px;padding:1.25rem 1.5rem;cursor:pointer;font:inherit;box-shadow:5px 5px 0 var(--accent)}
+.class:hover{transform:translate(-1px,-1px);box-shadow:7px 7px 0 var(--accent)}
+.class b{display:block;font:800 2.25rem/1 "Bricolage Grotesque","Trebuchet MS",sans-serif;margin-bottom:.4rem}
+.class span{color:var(--muted)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.back{background:none;border:0;color:var(--accent);font:inherit;font-weight:700;cursor:pointer;padding:.25rem 0;margin-bottom:1rem;text-decoration:underline}
+.card{background:var(--surface);border:2px solid var(--ink);border-radius:6px;overflow:hidden}
+.cols,.row{display:grid;grid-template-columns:minmax(0,1fr) 3.5rem 5.5rem 4.75rem;gap:.5rem;align-items:center;padding:.4rem 1rem}
+.cols{font-size:.875rem;color:var(--muted);padding-top:.75rem}
+.cols span:nth-child(n+2),.pts{text-align:right}
+.tier{background:var(--band);padding:.4rem 1rem;font-weight:700;border-top:1.5px solid var(--line);border-bottom:1.5px solid var(--line);margin-top:.4rem}
+.tier small{font-weight:400;color:var(--muted);margin-left:.4rem}
+.hrs{text-align:right;color:var(--muted)}
+input{width:100%;min-width:0;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:4px;padding:.45rem .5rem;min-height:2.5rem;text-align:right}
+input::placeholder{color:var(--muted);opacity:.7}
+input[aria-invalid="true"]{border-color:var(--bad)}
+.pts{font-variant-numeric:tabular-nums}
+.foot{border-top:2px solid var(--ink);padding:1rem}
+.foot dl{display:grid;grid-template-columns:1fr auto;gap:.3rem 1rem;margin:0 0 1rem}
+.foot dt{color:var(--muted)}.foot dd{margin:0;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.final{font-weight:700}
+.big{font-size:clamp(3rem,10vw,4.5rem);font-weight:800;line-height:1;letter-spacing:-.03em;display:inline;background:linear-gradient(transparent 58%,var(--hi) 58%);padding-right:.15em}
+#msg{margin:.5rem 0 0;color:var(--muted)}
+#err{margin:.5rem 0 0;color:var(--bad);font-weight:700}
+.btn{background:none;color:var(--ink);border:2px solid var(--line);border-radius:4px;padding:.5rem 1rem;font:inherit;font-weight:700;cursor:pointer;margin-top:1rem}
+@media(max-width:30rem){.cols,.row{grid-template-columns:minmax(0,1fr) 2.4rem 4.4rem 4.25rem;gap:.3rem;padding-left:.75rem;padding-right:.75rem}.tier{padding-left:.75rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="home">
+    <h1>Final average calculator</h1>
+    <p class="lede">Choose a class to enter grades and work out the final average for the progress report.</p>
+    <div class="classes" id="classes"></div>
+  </section>
+
+  <section id="cls" hidden>
+    <button class="back" id="back" type="button">Back to classes</button>
+    <h1 id="title"></h1>
+    <p class="lede" id="lede2"></p>
+    <div class="card">
+      <div class="cols" aria-hidden="true"><span>Subject</span><span>Hrs</span><span>Grade</span><span>Points</span></div>
+      <div id="rows"></div>
+      <div class="foot">
+        <dl>
+          <dt>Total credit hours</dt><dd id="hrs"></dd>
+          <dt>Total points</dt><dd id="tp">0.00</dd>
+        </dl>
+        <div class="final" aria-live="polite">
+          <div>Final average</div>
+          <div id="fa"><span class="big">&ndash;</span></div>
+          <p id="msg"></p>
+          <p id="err" role="alert" hidden></p>
+          <p style="margin:.25rem 0 0;color:var(--muted);font-weight:400">* mistakes are possible</p>
+        </div>
+        <button class="btn" id="clear" type="button">Clear all grades</button>
+      </div>
+    </div>
+  </section>
+</div>
+<script>
+(function(){
+function T(m,s,r,si){return [{name:"Majors",cr:4,subs:m},{name:"Sub-majors",cr:3,subs:s},{name:"Regulars",cr:2,subs:r},{name:"Singles",cr:1,subs:si}];}
+var REG=["Spanish","Belizean Studies","Entrepreneurship"];
+var CL=[
+ {id:"ict",name:"ICT",tiers:T(["Programming","MIC","English","Math"],["Physics"],["Networking"].concat(REG),["Literature","LSK","PE"])},
+ {id:"science",name:"Science",tiers:T(["Chemistry","English","Math"],["I.T","Biology","Physics"],REG,["Literature","LSK","PE"])},
+ {id:"arts",name:"Arts",tiers:T(["History","English","Math"],["Literature","HSB","I.T"],REG.concat(["PE"]),["LSK"])},
+ {id:"business",name:"Business",tiers:T(["POA","English","Math"],["HSB","POB","I.T"],REG,["Literature","LSK","PE"])}
+];
+CL.forEach(function(c){c.n=0;c.hrs=0;c.tiers.forEach(function(t){c.n+=t.subs.length;c.hrs+=t.subs.length*t.cr;});});
+function $(id){return document.getElementById(id);}
+var cur=null,g={},cells=[];
+CL.forEach(function(c){
+  var b=document.createElement("button");b.type="button";b.className="class";
+  b.innerHTML="<b>"+c.name+"</b><span>"+c.n+" subjects, "+c.hrs+" credit hours</span>";
+  b.addEventListener("click",function(){location.hash=c.id;});
+  $("classes").appendChild(b);
+});
+function keyOf(c){return c.id==="ict"?"ict-report-grades":"report-grades-"+c.id;}
+function save(){try{localStorage.setItem(keyOf(cur),JSON.stringify(g));}catch(e){}}
+function fmt(n,d){return (Math.round(n*Math.pow(10,d))/Math.pow(10,d)).toFixed(d);}
+function fmt6(n){var t=Math.floor(n*1000+1e-7),b=Math.floor(t/10);if(t%10>=6)b+=1;return (b/100).toFixed(2);}
+function openClass(c){
+  cur=c;g={};
+  try{g=JSON.parse(localStorage.getItem(keyOf(c))||"{}")||{};}catch(e){g={};}
+  $("title").textContent=c.name+" progress report";
+  $("lede2").textContent="Enter each grade as a percentage from 0 to 100. Each grade is multiplied by its credit hours, then the total is divided by "+c.hrs+".";
+  $("hrs").textContent=c.hrs;
+  var rows=$("rows"),k=0;rows.innerHTML="";cells=[];
+  c.tiers.forEach(function(t){
+    var h=document.createElement("div");h.className="tier";
+    h.innerHTML=t.name+"<small>"+t.cr+" credit hour"+(t.cr>1?"s":"")+" each</small>";
+    rows.appendChild(h);
+    t.subs.forEach(function(s){
+      var r=document.createElement("div");r.className="row";
+      var n=document.createElement("label");n.textContent=s;
+      var hr=document.createElement("span");hr.className="hrs";hr.textContent=t.cr;
+      var i=document.createElement("input");i.type="number";i.inputMode="decimal";i.step="any";i.min="0";i.max="100";i.placeholder="0\u2013100";i.value=g[s]||"";
+      i.id="g"+(k++);n.htmlFor=i.id;
+      var p=document.createElement("span");p.className="pts";
+      i.addEventListener("input",function(){g[s]=i.value;save();calc();});
+      r.appendChild(n);r.appendChild(hr);r.appendChild(i);r.appendChild(p);rows.appendChild(r);
+      cells.push({s:s,cr:t.cr,i:i,p:p});
+    });
+  });
+  calc();
+}
+function calc(){
+  var tp=0,done=0,bad=0;
+  cells.forEach(function(c){
+    var raw=c.i.value.trim(),v=parseFloat(raw);
+    var ok=raw!==""&&!isNaN(v)&&v>=0&&v<=100;
+    c.i.setAttribute("aria-invalid",raw!==""&&!ok?"true":"false");
+    if(raw!==""&&!ok)bad++;
+    if(ok){done++;tp+=v*c.cr;c.p.textContent=fmt(v*c.cr,2);}else{c.p.textContent="";}
+  });
+  $("tp").textContent=fmt(tp,2);
+  var fa=$("fa"),msg=$("msg"),err=$("err");
+  err.hidden=!bad;err.textContent=bad?"Grades must be a number from 0 to 100.":"";
+  if(done===cells.length){
+    fa.innerHTML='<span class="big">'+fmt6(tp/cur.hrs)+'%</span>';
+    msg.textContent="Total points "+fmt(tp,2)+" divided by "+cur.hrs+" credit hours.";
+  }else{
+    fa.innerHTML='<span class="big">&ndash;</span>';
+    var left=cells.length-done;
+    msg.textContent="Enter "+left+" more grade"+(left>1?"s":"")+" to see the final average.";
+  }
+}
+function route(){
+  var id=location.hash.slice(1),c=CL.filter(function(x){return x.id===id;})[0];
+  $("home").hidden=!!c;$("cls").hidden=!c;
+  if(c)openClass(c);
+  window.scrollTo(0,0);
+}
+$("back").addEventListener("click",function(){location.hash="";});
+$("clear").addEventListener("click",function(){g={};save();cells.forEach(function(c){c.i.value="";});calc();});
+window.addEventListener("hashchange",route);
+route();
+})();
+</script>
+</body>
+</html>
